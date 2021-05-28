@@ -1,9 +1,103 @@
-#ask for a list of todos
-#and print them back to us
+require "date"
 
-puts "What is your next todo?"
-next_todo = gets
+class Todo
+  # ..
+  # ..
+  def initialize(text, due_date, completed)
+    @text = text
+    @due_date = due_date
+    @completed = completed
+  end
 
-puts "\n\n\n" #Carriage return
+  def overdue?
+    @due_date < Date.today
+  end
 
-puts "[ ] #{next_todo}" #String Interpolation
+  def due_today?
+    @due_date == Date.today
+  end
+
+  def due_later?
+    @due_date > Date.today
+  end
+  # ..
+  # ..
+
+  def to_displayable_string
+    if @due_date == Date.today
+      if @completed == true
+        "[X] #{@text}"
+      else
+        "[ ] #{@text}"
+      end
+    else
+      if @completed == true
+        "[X] #{@text} #{@due_date}"
+      else
+        "[ ] #{@text} #{@due_date}"
+      end
+    end
+  end
+end
+
+class TodosList
+  def initialize(todos)
+    @todos = todos
+  end
+
+  def overdue
+    TodosList.new(@todos.filter { |todo| todo.overdue? })
+  end  
+
+  # ..
+  # ..
+  def due_today
+    TodosList.new(@todos.filter { |todo| todo.due_today? })
+  end 
+
+  def due_later
+    TodosList.new(@todos.filter { |todo| todo.due_later? })
+  end 
+
+  def add(item)
+    @todos.push(item)
+  end
+  # ..
+  # ..
+
+  def to_displayable_list
+    @todos.map do |todo|
+      todo.to_displayable_string
+    end
+  end
+end
+
+date = Date.today
+todos = [
+  { text: "Submit assignment", due_date: date - 1, completed: false },
+  { text: "Pay rent", due_date: date, completed: true },
+  { text: "File taxes", due_date: date + 1, completed: false },
+  { text: "Call Acme Corp.", due_date: date + 1, completed: false },
+]
+
+todos = todos.map { |todo|
+  Todo.new(todo[:text], todo[:due_date], todo[:completed])
+}
+
+todos_list = TodosList.new(todos)
+
+todos_list.add(Todo.new("Service vehicle", date, false))
+
+puts "My Todo-list\n\n"
+
+puts "Overdue\n"
+puts todos_list.overdue.to_displayable_list
+puts "\n\n"
+
+puts "Due Today\n"
+puts todos_list.due_today.to_displayable_list
+puts "\n\n"
+
+puts "Due Later\n"
+puts todos_list.due_later.to_displayable_list
+puts "\n\n"
