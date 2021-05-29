@@ -1,8 +1,6 @@
 require "date"
 
 class Todo
-  # ..
-  # ..
   def initialize(text, due_date, completed)
     @text = text
     @due_date = due_date
@@ -20,22 +18,17 @@ class Todo
   def due_later?
     @due_date > Date.today
   end
-  # ..
-  # ..
 
   def to_displayable_string
-    if @due_date == Date.today
-      if @completed == true
-        "[X] #{@text}"
-      else
-        "[ ] #{@text}"
-      end
+    if @completed
+      display_status = "[X]"
     else
-      if @completed == true
-        "[X] #{@text} #{@due_date}"
-      else
-        "[ ] #{@text} #{@due_date}"
-      end
+      display_status = "[ ]"
+    end
+    if due_today?
+        "#{display_status} #{@text}"
+    else
+        "#{display_status} #{@text} #{@due_date}"
     end
   end
 end
@@ -49,8 +42,6 @@ class TodosList
     TodosList.new(@todos.filter { |todo| todo.overdue? })
   end  
 
-  # ..
-  # ..
   def due_today
     TodosList.new(@todos.filter { |todo| todo.due_today? })
   end 
@@ -62,8 +53,6 @@ class TodosList
   def add(item)
     @todos.push(item)
   end
-  # ..
-  # ..
 
   def to_displayable_list
     @todos.map{|todo| todo.to_displayable_string}.join("\n")
