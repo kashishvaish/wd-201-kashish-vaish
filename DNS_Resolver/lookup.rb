@@ -21,31 +21,32 @@ def get_command_line_argument
   # ..
   # ..
   def parse_dns(raw)
-    hash = {}
-    raw.each do |x|
-        parts = x.split(",").map{|n| n.strip}
-        hash[parts[1]] = {
-            "destination" => parts[2],
-            "type" => parts[0]
+    raw.
+      reject{|line| line.empty?}.
+      map{|line| line.strip.split(", ")}.
+      reject do |record|
+        record[0] != 'A' and record[0] != 'CNAME'
+      end.
+      each_with_object({}) do |record, records|
+        records[record[1]] = {
+          :destination => record[2],
+          :type => record[0]
         }
-    end
-    return hash
+      end
   end
 
   def resolve(records, chain, domain)
-    if records[domain] == nil
+    dns_record = records[domain]
+    if !dns_record
         puts "Error: record not found for #{domain}"
         exit
-    end
-    to = records[domain]["destination"]
-    chain.push(to)
-    if records[domain]["type"] == 'A'       
-        return chain
-    elsif records[domain]["type"] == 'CNAME'
-        return resolve(records, chain, to)
+    elsif dns_record[:type] == 'A'       
+        chain << dns_record[:destination]
+    elsif dns_record[:type] == 'CNAME'
+        chain << dns_record[:destination]
+        resolve(records, chain, dns_record[:destination])
     else
-        puts "Error: inconsistent records found"
-        exit
+        chain << "Invalid record type for #{domain}"
     end
   end
   # ..
