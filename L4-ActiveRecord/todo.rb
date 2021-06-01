@@ -5,6 +5,18 @@ class Todo < ActiveRecord::Base
     due_date == Date.today
   end
 
+  def self.overdue
+    where("due_date < ?", Date.today)
+  end
+
+  def self.due_today
+    where("due_date = ?", Date.today)
+  end
+
+  def self.due_later
+    where("due_date > ?", Date.today)
+  end
+
   def to_displayable_string
     display_status = completed ? "[X]" : "[ ]"
     display_date = due_today? ? nil : due_date
@@ -18,15 +30,15 @@ class Todo < ActiveRecord::Base
   def self.show_list
     puts "My Todo-list\n\n"
     puts "Overdue\n"
-    puts where("due_date < ?", Date.today).to_displayable_list
+    puts overdue.to_displayable_list
     puts "\n\n"
 
     puts "Due Today\n"
-    puts where("due_date = ?", Date.today).to_displayable_list
+    puts due_today.to_displayable_list
     puts "\n\n"
 
     puts "Due Later\n"
-    puts where("due_date > ?", Date.today).to_displayable_list
+    puts due_later.to_displayable_list
     puts "\n\n"
   end
 
